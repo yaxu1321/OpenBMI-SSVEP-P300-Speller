@@ -1,0 +1,82 @@
+# OpenBMI (Lee2019) Visual BCI Speller (SSVEP + P300) Configuration
+
+project:
+  name: "OpenBMI_SSVEP_P300_Speller"
+  seed: 42
+  data_dir: "data/mne_data"
+  results_dir: "results"
+
+dataset:
+  # Full OpenBMI has 54 subjects (1..54).
+  # Use quick_subjects for fast smoke-testing, full_subjects for complete benchmark.
+  quick_subjects: [1, 2, 3, 4, 5]
+  full_subjects: [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+    21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+    31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+    51, 52, 53, 54
+  ]
+  notch_freq: 60.0  # OpenBMI was recorded in South Korea (60 Hz powerline)
+
+ssvep:
+  sfreq: 250.0
+  l_freq: 4.0
+  h_freq: 45.0
+  tmin: -0.2
+  tmax: 4.0
+  baseline: [-0.2, 0.0]
+  visual_delay: 0.14  # Visual pathway latency offset (seconds)
+  frequencies: [5.45, 6.67, 8.57, 12.0]
+  # Occipital & parieto-occipital channels for SSVEP
+  channels: ["PO7", "PO3", "POz", "PO4", "PO8", "O1", "Oz", "O2", "PO9", "PO10"]
+  window_lengths: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+  gaze_shift_time: 0.5  # Gaze shifting time for ITR calculation (seconds)
+  n_harmonics: 5
+  filter_bank:
+    n_subbands: 5
+    cheby_order: 4
+    cheby_rp: 1.0
+    # Sub-band lower cutoff frequencies (Hz) tailored for 5.45-12.0 Hz + harmonics
+    subband_lows: [4.5, 9.0, 13.5, 18.0, 22.5]
+    subband_high: 45.0
+    weight_a: 1.25
+    weight_b: 0.25
+  etrca:
+    regularization: 0.01
+
+p300:
+  sfreq: 125.0
+  l_freq: 0.5
+  h_freq: 20.0
+  tmin: -0.2
+  tmax: 0.8
+  baseline: [-0.2, 0.0]
+  # Parieto-occipital & centro-parietal channels for P300 ERP
+  channels: [
+    "Fz", "FC1", "FC2", "C3", "Cz", "C4",
+    "CP1", "CP2", "P7", "P3", "Pz", "P4", "P8",
+    "PO7", "PO3", "POz", "PO4", "PO8", "O1", "Oz", "O2"
+  ]
+  xdawn:
+    n_filters: 4
+    cov_estimator: "lwf"
+    xdawn_estimator: "scm"
+    classifier_c: 1.0
+  eegnet:
+    f1: 8
+    d: 2
+    f2: 16
+    kernel_length: 64
+    dropout: 0.5
+    epochs: 50
+    batch_size: 64
+    lr: 0.001
+    weight_decay: 0.0001
+    val_ratio: 0.15
+    patience: 10
+  speller:
+    n_rows: 6
+    n_cols: 6
+    n_repetitions: 5  # OpenBMI Lee2019_ERP uses 5 sequences per character (60 flashes)
